@@ -1,0 +1,25 @@
+# GitHub'a yüklemek için aşağıdaki komutları sırasıyla çalıştırın:
+
+# 1. Git deposunu başlatın
+git init
+
+# 2. Tüm dosyaları ekleyin
+git add .
+
+# 3. İlk commit'i oluşturun
+git commit -m "İlk commit: FaceSecure projesi"
+
+# 4. GitHub'da yeni bir repo oluşturun (https://github.com/new)
+# Repo adı: FaceSecure
+# Açıklama: Yüz tanıma teknolojisi kullanarak güvenli kimlik doğrulama sağlayan modern bir web uygulaması
+# Public olarak ayarlayın
+# README, .gitignore ve LICENSE dosyalarını oluşturmayı seçmeyin (bunları zaten oluşturduk)
+
+# 5. Remote repo'yu ekleyin (GitHub'da repo oluşturduktan sonra)
+git remote add origin https://github.com/AliKemalSahin/FaceSecure.git
+
+# 6. Değişiklikleri push edin
+git push -u origin main
+
+# Not: Eğer default branch adınız "master" ise, aşağıdaki komutu kullanın:
+# git push -u origin master
