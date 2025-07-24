@@ -1,0 +1,24 @@
+# Git ile ilgili dosyalar
+.git
+.gitignore
+.gitattributes
+
+# Python cache dosyaları
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Sanal ortam klasörü (varsa)
+.venv
+venv/
+env/
+
+# Docker ile ilgili dosyalar
+Dockerfile
+docker-compose.yml
+backend.Dockerfile
+frontend.Dockerfile
+
+# Hassas bilgileri içeren .env dosyası
+.env
