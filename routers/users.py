@@ -46,9 +46,7 @@ async def verify_face(request: Request, image_file: UploadFile = File(...)):
         encrypted_embedding = user.get("face_embedding")
         
         
-        if encrypted_embedding is None:
-            print(f"Kullanıcı '{user.get('username')}' için yüz verisi bulunamadı.")
-            continue
+        
             
         # MongoDB'den gelen veriyi bytes'a çevir
         try:
