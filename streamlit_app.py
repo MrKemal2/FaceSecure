@@ -30,29 +30,6 @@ def navigate_to(page_name):
     st.session_state.page = page_name
     st.rerun()
 
-def validate_token_and_get_user(token):
-    """Verilen token'ı doğrular ve kullanıcı bilgilerini getirir."""
-    headers = {"Authorization": f"Bearer {token}"}
-    try:
-        response = requests.get(f"{API_URL}/users/me", headers=headers)
-        if response.status_code == 200:
-            user_data = response.json()
-            st.session_state.logged_in = True
-            st.session_state.username = user_data.get("username")
-            st.session_state.admin_token = token
-            st.session_state.role = user_data.get("is_admin")
-            st.session_state.page = "admin" if st.session_state.role else "member"
-            return True
-        else:
-            # Token geçersizse veya süresi dolmuşsa session state'i temizle
-            st.session_state.clear()
-            return False
-    except requests.exceptions.ConnectionError:
-        st.error("API sunucusuna bağlanılamıyor.")
-        return False
-    except Exception as e:
-        st.error("Oturum doğrulanırken bir hata oluştu: ",e)
-        return False
 
 
 
@@ -75,8 +52,6 @@ def admin_login(username, password):
                 # Role göre sayfa belirle
                 if st.session_state.role:
                     navigate_to("admin")
-                else:
-                    navigate_to("member")
                 return True
 
         elif response.status_code == 401:
@@ -102,7 +77,11 @@ def get_all_users(token):
         if response.status_code==200:
             return response.json()
         else:
-            st.error(f"Kullanıcıları getirirken bir hata oluştu: {response.json().get('detail')}")
+            try:
+                error_detail = response.json().get('detail', 'Bilinmeyen hata')
+            except:
+                error_detail = response.text or f"HTTP {response.status_code} hatası"
+            st.error(f"Kullanıcıları getirirken bir hata oluştu: {error_detail}")
             return None
     except requests.exceptions.ConnectionError:
         st.error("API Sunucusuna bağlanılamıyor")
@@ -159,9 +138,17 @@ def show_login_page():
                             time.sleep(1)
                             st.rerun()
                         else:
-                            st.error(f"Giriş başarısız: {response.json().get('detail')}")
+                            try:
+                                error_detail = response.json().get('detail', 'Bilinmeyen hata')
+                            except:
+                                error_detail = response.text or f"HTTP {response.status_code} hatası"
+                            st.error(f"Giriş başarısız: {error_detail}")
                     except requests.exceptions.ConnectionError:
                         st.error("API sunucusuna bağlanılamıyor.")
+                    except requests.exceptions.JSONDecodeError:
+                        st.error("API'den geçersiz yanıt alındı.")
+                    except Exception as e:
+                        st.error(f"Beklenmeyen hata: {str(e)}")
     with tab2:
         st.header("Admin Giriş Paneli")
         with st.form("admin_login_form", clear_on_submit=True):
@@ -180,10 +167,10 @@ def logout():
     st.session_state.role = False
     st.session_state.page = "login"
     
-    # Başarı mesajı göster
+    
     st.success("Başarıyla çıkış yapıldı!")
     
-    # Sayfayı yenile
+    
     st.rerun()
 
 def admin_panel():
@@ -194,7 +181,7 @@ def admin_panel():
 
     MAX_POSES = 10
     
-    # Çıkış butonu
+    
 
     st.subheader("Yeni Kullanıcı Ekle")
     st.progress(len(st.session_state.embeddings) / MAX_POSES)
@@ -218,9 +205,17 @@ def admin_panel():
                     time.sleep(1)
                     st.rerun()
                 else:
-                    st.error(f"Poz kaydedilemedi: {response.json().get('detail')}")
+                    try:
+                        error_detail = response.json().get('detail', 'Bilinmeyen hata')
+                    except:
+                        error_detail = response.text or f"HTTP {response.status_code} hatası"
+                    st.error(f"Poz kaydedilemedi: {error_detail}")
             except requests.exceptions.ConnectionError:
                 st.error("API sunucusuna bağlanılamıyor.")
+            except requests.exceptions.JSONDecodeError:
+                st.error("API'den geçersiz yanıt alındı.")
+            except Exception as e:
+                st.error(f"Beklenmeyen hata: {str(e)}")
     else:
         st.success(f"{MAX_POSES} farklı poz başarıyla toplandı!")
     
@@ -249,7 +244,11 @@ def admin_panel():
                         st.rerun() # Sayfayı yenileyerek girdi alanlarını temizle
 
                     else:
-                        st.error(f"Kayıt tamamlanamadı: {response.json().get('detail')}")
+                        try:
+                            error_detail = response.json().get('detail', 'Bilinmeyen hata')
+                        except:
+                            error_detail = response.text or f"HTTP {response.status_code} hatası"
+                        st.error(f"Kayıt tamamlanamadı: {error_detail}")
                 except requests.exceptions.ConnectionError:
                         st.error("API sunucusuna bağlanılamıyor.")
 
@@ -305,7 +304,9 @@ def member_panel():
     response = requests.get(f"{API_URL}/users/me", headers={"Authorization": f"Bearer {st.session_state.token}"})
     user_data = response.json()
     st.write("Hoşgeldin ", user_data.get("full_name"))
-
+    if st.button("Çıkış Yap", key="user_logout_button"):
+        logout()
+        return  # Fonksiyondan çık
 
 
 

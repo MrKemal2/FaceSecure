@@ -1,181 +1,144 @@
 # FaceSecure - Yüz Tanıma Sistemi
 
-FaceSecure, yüz tanıma teknolojisi kullanarak güvenli kimlik doğrulama sağlayan modern bir web uygulamasıdır. FastAPI backend ve Streamlit frontend ile geliştirilmiştir.
+FaceSecure, yüz tanıma teknolojisi kullanarak güvenli kimlik doğrulama sağlayan modern bir web uygulamasıdır. FastAPI backend ve Streamlit frontend ile geliştirilmiş, Docker ile konteynerize edilmiş bir sistemdir.
 
 ## 🚀 Özellikler
 
 - **Yüz Tanıma ile Giriş**: Kamera kullanarak yüz tanıma ile güvenli giriş
 - **Admin Paneli**: Kullanıcı yönetimi ve sistem kontrolü
-- **Güvenli Şifreleme**: Yüz verilerinin şifreli saklanması
+- **Çoklu Poz Kayıt**: 10 farklı pozdan yüz verisi toplama
+- **Güvenli Şifreleme**: Yüz verilerinin AES şifreleme ile korunması
 - **JWT Token Sistemi**: Güvenli oturum yönetimi
 - **MongoDB Entegrasyonu**: Hızlı ve güvenilir veri saklama
 - **Real-time Kamera**: Anlık yüz yakalama ve doğrulama
+- **Docker Desteği**: Kolay kurulum ve dağıtım
+- **Başarısız Giriş Loglama**: Güvenlik için detaylı log sistemi
 
 ## 🛠️ Teknolojiler
 
-- **Backend**: FastAPI, Python
+- **Backend**: FastAPI, Python 3.12
 - **Frontend**: Streamlit
 - **Veritabanı**: MongoDB
-- **Yüz Tanıma**: DeepFace, MediaPipe, OpenCV
-- **Güvenlik**: JWT, Cryptography, Bcrypt
-- **Diğer**: NumPy, Pandas
+- **Yüz Tanıma**: FaceNet, MediaPipe, OpenCV, Numpy
+- **Güvenlik**: JWT, Cryptography (Fernet), Bcrypt
+- **ML/AI**: TensorFlow, Keras-FaceNet, Scikit-learn
+- **Konteynerizasyon**: Docker, Docker Compose
+- 
 
 ## 📋 Gereksinimler
 
-- Python 3.8+
-- MongoDB
+- Docker ve Docker Compose (Önerilen)
+- Python 3.11+ (Manuel kurulum için)
 - Webcam/Kamera
 
 ## 🔧 Kurulum
 
-### 1. Projeyi Klonlayın
+### Docker ile Kurulum (Önerilen)
+
+#### 1. Projeyi Klonlayın
+
 ```bash
 git clone https://github.com/AliKemalSahin/FaceSecure.git
 cd FaceSecure
 ```
 
-### 2. Sanal Ortam Oluşturun
+#### 2. Docker Compose ile Başlatın
+
 ```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
+docker-compose up -d
 ```
 
-### 3. Bağımlılıkları Yükleyin
-```bash
-pip install -r requirements.txt
-```
+Bu komut otomatik olarak:
 
-### 4. MongoDB'yi Başlatın
-MongoDB'nin sisteminizde kurulu ve çalışır durumda olduğundan emin olun.
+- MongoDB konteynerini başlatır
+- Backend API'yi derler ve çalıştırır
+- Frontend uygulamasını başlatır
+- Gerekli ağ bağlantılarını kurar
 
-### 5. Ortam Değişkenlerini Ayarlayın
-`.env.example` dosyasını `.env` olarak kopyalayın ve gerekli değerleri düzenleyin:
-```bash
-cp .env.example .env
-```
+#### 3. Uygulamaya Erişin
 
-### 6. İlk Admin Kullanıcısını Oluşturun
-MongoDB'de admin koleksiyonuna ilk admin kullanıcısını manuel olarak ekleyin:
-```javascript
-use denemeFaceSecure
-db.admin_collection.insertOne({
-  "username": "admin",
-  "password": "admin123",
-  "full_name": "System Administrator",
-  "is_admin": true
-})
-```
-
-## 🚀 Çalıştırma
-
-### Backend'i Başlatın
-```bash
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
-```
-
-### Frontend'i Başlatın (Yeni Terminal)
-```bash
-streamlit run streamlit_app.py
-```
-
-Uygulama şu adreslerde çalışacaktır:
 - **Frontend**: http://localhost:8501
 - **Backend API**: http://localhost:8000
 - **API Dokümantasyonu**: http://localhost:8000/docs
 
+### Manuel Kurulum
+
+#### 1. Projeyi Klonlayın
+
+```bash
+git clone https://github.com/MrKemal2/FaceSecure.git
+cd FaceSecure
+```
+
+#### 2. MongoDB'yi Başlatın
+
+MongoDB'nin sisteminizde kurulu ve çalışır durumda olduğundan emin olun.
+
+#### 3. Backend Kurulumu
+
+```bash
+# Backend bağımlılıklarını yükleyin
+pip install -r requirements-backend.txt
+
+# Backend'i başlatın
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+#### 4. Frontend Kurulumu (Yeni Terminal)
+
+```bash
+# Frontend bağımlılıklarını yükleyin
+pip install -r requirements-frontend.txt
+
+# Frontend'i başlatın
+streamlit run streamlit_app.py --server.port 8501 --server.address 0.0.0.0  
+```
+
+## 🚀 İlk Kullanım
+
+### Admin Hesabı
+
+Sistem ilk çalıştırıldığında otomatik olarak bir admin hesabı oluşturulur:
+
+- **Kullanıcı Adı**: admin
+- **Şifre**: admin
+
+### Yeni Kullanıcı Ekleme
+
+1. Admin hesabı ile giriş yapın
+2. "Yeni Kullanıcı Ekle" bölümünde 10 farklı pozdan fotoğraf çekin
+3. Kullanıcının ad-soyad ve kullanıcı adı bilgilerini girin
+4. Kayıt işlemini tamamlayın
+
 ## 📱 Kullanım
 
 ### Admin Girişi
+
 1. Streamlit uygulamasında "Admin Girişi" sekmesini seçin
-2. Admin kullanıcı adı ve şifrenizi girin
-3. Admin panelinde yeni kullanıcılar ekleyebilirsiniz
+2. Varsayılan admin bilgileri ile giriş yapın (Kullanıcı adı: admin Şifre: admin)
+3. Admin panelinde kullanıcı yönetimi yapabilirsiniz
 
 ### Yeni Kullanıcı Ekleme
-1. Admin panelinde kameradan 10 farklı poz çekin
-2. Kullanıcının ad-soyad ve kullanıcı adı bilgilerini girin
-3. Kayıt işlemini tamamlayın
+
+1. Admin panelinde "Yeni Kullanıcı Ekle" bölümüne gidin
+2. Kameradan 10 farklı poz çekin (sağa, sola, yukarı, aşağı bakarak)
+3. Tüm pozlar tamamlandıktan sonra:
+   - Ad Soyad bilgisini girin
+   - Kullanıcı adını girin
+   - "Yüz Kaydını Tamamla" butonuna tıklayın
 
 ### Yüz Tanıma ile Giriş
+
 1. "Kullanıcı Girişi" sekmesinde kameradan fotoğraf çekin
 2. Sistem yüzünüzü tanıyacak ve otomatik giriş yapacaktır
+3. Başarılı girişte üye paneline yönlendirilirsiniz
 
-## 🔒 Güvenlik
+### Kullanıcı Yönetimi
 
-- Tüm yüz verileri AES şifreleme ile korunur
-- JWT token'lar ile güvenli oturum yönetimi
-- Başarısız giriş denemeleri loglanır
-- Admin yetkilendirme sistemi
+- Admin panelinde tüm kullanıcıları görüntüleyebilirsiniz
+- Admin olmayan kullanıcıları silebilirsiniz
+- Kullanıcı listesinde ad, kullanıcı adı ve yetki bilgileri görünür
 
-## 📁 Proje Yapısı
 
-```
-facesecure/
-├── main.py                 # FastAPI ana uygulama
-├── streamlit_app.py        # Streamlit frontend
-├── database.py             # MongoDB bağlantı ve işlemleri
-├── security.py             # Güvenlik ve şifreleme
-├── face_detection.py       # Yüz tanıma algoritmaları
-├── schemas.py              # Pydantic modelleri
-├── routers/
-│   ├── users.py           # Kullanıcı API endpoint'leri
-│   └── admin.py           # Admin API endpoint'leri
-├── requirements.txt        # Python bağımlılıkları
-├── .env                   # Ortam değişkenleri
-├── .env.example           # Ortam değişkenleri örneği
-└── README.md              # Bu dosya
-```
 
-## 🔧 Konfigürasyon
 
-### Yüz Tanıma Ayarları
-- `SIMILARITY_THRESHOLD`: Yüz eşleştirme hassasiyeti (0.0-1.0)
-- `MODEL_NAME`: Kullanılacak yüz tanıma modeli
-- `NUM_PICS_TO_ENROLL`: Kayıt için gerekli fotoğraf sayısı
-
-### Güvenlik Ayarları
-- `SECRET_KEY`: JWT token şifreleme anahtarı
-- `ENCRYPTION_KEY`: Yüz verisi şifreleme anahtarı
-- `ACCESS_TOKEN_EXPIRE_MINUTES`: Token geçerlilik süresi
-
-## 🐛 Sorun Giderme
-
-### Kamera Erişim Sorunu
-- Tarayıcınızın kamera erişim izni verdiğinden emin olun
-- HTTPS bağlantısı gerekebilir (production ortamında)
-
-### MongoDB Bağlantı Sorunu
-- MongoDB servisinin çalıştığından emin olun
-- Bağlantı URL'sini kontrol edin
-
-### Yüz Tanıma Sorunu
-- İyi aydınlatma koşullarında fotoğraf çekin
-- Yüzünüzün tam görünür olduğundan emin olun
-- Similarity threshold değerini ayarlayın
-
-## 🤝 Katkıda Bulunma
-
-1. Bu projeyi fork edin
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Add amazing feature'`)
-4. Branch'inizi push edin (`git push origin feature/amazing-feature`)
-5. Pull Request oluşturun
-
-## 📄 Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için `LICENSE` dosyasına bakın.
-
-## 📞 İletişim
-
-Proje Sahibi - [GitHub](https://github.com/AliKemalSahin)
-
-Proje Linki: [https://github.com/AliKemalSahin/FaceSecure](https://github.com/AliKemalSahin/FaceSecure)
-
-## 🙏 Teşekkürler
-
-- [DeepFace](https://github.com/serengil/deepface) - Yüz tanıma kütüphanesi
-- [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
-- [Streamlit](https://streamlit.io/) - Web app framework
-- [MediaPipe](https://mediapipe.dev/) - Yüz algılama

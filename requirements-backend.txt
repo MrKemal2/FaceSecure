@@ -16,3 +16,5 @@ tensorflow>=2.13.0
 python-dotenv>=1.0.0
 tf-keras
 pyjwt
+keras-facenet
+scikit-learn

@@ -9,13 +9,22 @@ load_dotenv()
 
 try:
     MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017/")
-    DATABASE_NAME = os.getenv("DATABASE_NAME", "denemeFaceSecure")
+    DATABASE_NAME = os.getenv("DATABASE_NAME", "FaceSecure")
     
     client = MongoClient(MONGODB_URL)
     db = client[DATABASE_NAME]
     collection = db.user_collection
     logs_collection = db.logs
     admin_collection = db.admin_collection
+    admin_user = admin_collection.find_one({"username": "admin31"})
+    if not admin_user:
+        from security import get_password_hash
+
+        admin_collection.insert_one({
+            "full_name": "Sistem Yöneticisi",
+            "username": "admin",
+            "hashed_password": get_password_hash("admin"),
+            "is_admin": True})
 except pymongo.errors.ConnectionFailure:
     print("MongoDB sunucusuna bağlanılamadı")
 
@@ -70,10 +79,9 @@ def log_failed_attempt(ip_address: str, reason: str):
     logs_collection.insert_one(log_data)
 
 def admin_login(username: str, password: str):
-    """Admin giriş işlemi. Bu fonksiyon zaten doğru koleksiyonu kullanıyor."""
+    """Admin giriş işlemi - güvenli şifre kontrolü ile."""
+    from security import verify_password
     admin_user = admin_collection.find_one({"username": username})
-    # ÖNEMLİ: Gerçek bir projede şifreler her zaman hash'lenerek saklanmalıdır!
-    # Bu sadece bir örnek.
-    if admin_user and admin_user.get("password") == password:
+    if admin_user and verify_password(password, admin_user.get("hashed_password", "")):
         return {"status": "success", "user": admin_user}
     return {"status": "error", "message": "Geçersiz admin kimlik bilgileri"}

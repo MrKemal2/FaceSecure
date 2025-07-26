@@ -10,8 +10,9 @@ from schemas import UserPublic
 from bson import Binary
 import os
 from dotenv import load_dotenv
+from sklearn.metrics.pairwise import cosine_similarity
 
-load_dotenv()
+
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -36,16 +37,15 @@ async def verify_face(request: Request, image_file: UploadFile = File(...)):
 
     best_match_user = None
     highest_similarity = 0.0
-    # Environment variable'dan threshold değerini al
-    SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.60"))
+    
+    SIMILARITY_THRESHOLD = 0.75
 
-    # Hata ayıklama için: Her kullanıcı için benzerlik skorunu konsola yazdır
-    print("\n--- Yüz Doğrulama Denemesi ---")
+    
 
     for user in users:
         encrypted_embedding = user.get("face_embedding")
         
-        # Skip users without face embedding
+        
         if encrypted_embedding is None:
             print(f"Kullanıcı '{user.get('username')}' için yüz verisi bulunamadı.")
             continue
@@ -65,22 +65,17 @@ async def verify_face(request: Request, image_file: UploadFile = File(...)):
             continue
             
 
-        similarity = face_detection.cosine_similarity(login_embedding, stored_embedding)
+        # Embeddings'leri 2D array formatına çevir (cosine_similarity için gerekli)
+        login_embedding_2d = login_embedding.reshape(1, -1)
+        stored_embedding_2d = stored_embedding.reshape(1, -1)
+        similarity = cosine_similarity(login_embedding_2d, stored_embedding_2d)[0][0]
 
-        # Hata ayıklama için:
-        print(f"Veritabanındaki kullanıcı '{user['username']}' ile benzerlik: {similarity:.4f}")
-        print(f"Veri tabanından alınan embedding: {stored_embedding}")
-        print(f"Giriş yapan kullanıcının embedding: {login_embedding}")
-        print("Veritabanından çözülmüş embedding:", stored_embedding)
+       
 
         if similarity > highest_similarity:
             highest_similarity = similarity
             best_match_user = user
-    print(f"Giriş yapan kullanıcının embedding: {login_embedding}")
-    print(f"Bulunan en yüksek benzerlik skoru: {highest_similarity:.4f}")
-    print(f"Gereken eşik değeri: {SIMILARITY_THRESHOLD}")
-    print("---------------------------------")
-
+    
 
     if best_match_user and highest_similarity >= SIMILARITY_THRESHOLD:
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -97,7 +92,7 @@ async def verify_face(request: Request, image_file: UploadFile = File(...)):
             "token_type": "bearer"
         }
     else:
-        # ---- DEĞİŞİKLİK 2: Hata mesajına skoru ekle ----
+        
         Db.log_failed_attempt(ip_address=request.client.host,reason= f"Düşük benzerlik skoru: {highest_similarity:.2f}")
         detail_message = (
             "Kimlik doğrulanamadı. Yüz eşleşmedi. "
@@ -110,18 +105,20 @@ async def verify_face(request: Request, image_file: UploadFile = File(...)):
 
 
 
-
-# ... (dosyanın geri kalanını değiştirmeyin)
+#------------Admin  giriş kontrolü-------------
 @router.post("/admin_token")
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    admin_user = Db.get_user(form_data.username)
-    if not admin_user or not admin_user.get("is_admin"):
+    
+    login_result = Db.admin_login(form_data.username, form_data.password)
+
+    if login_result.get("status") != "success":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Admin kullanıcısı bulunamadı",
+            detail="Geçersiz admin kimlik bilgileri",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
+    admin_user = login_result["user"]
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
         data={"sub": admin_user["username"]}, expires_delta=access_token_expires

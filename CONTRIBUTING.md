@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 3. Ortam değişkenlerini ayarlayın:
 ```bash
-cp .env.example .env
+cp .env .env
 # .env dosyasını düzenleyin
 ```
 
