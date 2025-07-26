@@ -174,7 +174,7 @@ def logout():
     st.rerun()
 
 def admin_panel():
-    st.header("Admin Paneli")
+    st.header("🛠️Admin Paneli")
     st.sidebar.header("Admin Paneli")
     if 'embeddings' not in st.session_state:
         st.session_state.embeddings = []
@@ -183,7 +183,7 @@ def admin_panel():
     
     
 
-    st.subheader("Yeni Kullanıcı Ekle")
+    st.subheader("📸Yeni Kullanıcı Ekle")
     st.progress(len(st.session_state.embeddings) / MAX_POSES)
     st.write(f"Kaydedilen Poz Sayısı: {len(st.session_state.embeddings)} / {MAX_POSES}")
 
@@ -256,7 +256,7 @@ def admin_panel():
 
 
    
-    st.subheader("Kullanıcı Listesi")
+    st.subheader("🪪 Kullanıcı Listesi")
 
     st.markdown("---")
     header_col1, header_col2, header_col3, header_col4 = st.columns([2, 1, 2, 1])
