@@ -257,7 +257,6 @@ def admin_panel():
 
    
     st.subheader("🪪 Kullanıcı Listesi")
-
     st.markdown("---")
     header_col1, header_col2, header_col3, header_col4 = st.columns([2, 1, 2, 1])
     with header_col1:
@@ -300,13 +299,61 @@ def admin_panel():
 
 
 def member_panel():
-    st.header("Üye Paneli")
+    # Kullanıcı bilgilerini al
     response = requests.get(f"{API_URL}/users/me", headers={"Authorization": f"Bearer {st.session_state.token}"})
     user_data = response.json()
-    st.write("Hoşgeldin ", user_data.get("full_name"))
-    if st.button("Çıkış Yap", key="user_logout_button"):
-        logout()
-        return  # Fonksiyondan çık
+    
+    # Hoşgeldin mesajı
+    st.success(f"🎉 Hoşgeldin {user_data.get('full_name', 'Kullanıcı')}!")
+    
+    # Ana layout - 3 kolon
+    tab1,tab2 = st.tabs(["👤Profil Bilgileri", "📊Oturum Bilgileri"])
+    
+    # Sol kolon - Profil Bilgileri
+    with tab1:
+        
+        
+        # Profil kartları
+        with st.container():
+            st.info("📝 **Ad Soyad**")
+            st.write(f"**{user_data.get('full_name', 'Belirtilmemiş')}**")
+        
+        with st.container():
+            st.info("🔑 **Kullanıcı Adı**")
+            st.write(f"**{user_data.get('username', 'Belirtilmemiş')}**")
+        
+        
+        # Hesap bilgileri
+        st.subheader("📋 Hesap Detayları")
+        with st.expander("ℹ️ Hesap Bilgileri"):
+            st.write(f"**👤 Kullanıcı Tipi:** {'Admin' if user_data.get('is_admin', False) else 'Standart Üye'}")
+            st.write(f"**🔐 Güvenlik Seviyesi:** Yüksek")
+            st.write(f"**📅 Hesap Durumu:** Aktif")
+            st.write(f"**🛡️ Yetkilendirme:** JWT Token")
+    
+    
+    # - Oturum Bilgileri ve İstatistikler
+    with tab2:
+        
+        
+        from datetime import datetime
+        current_time = datetime.now().strftime("%d/%m/%Y %H:%M")
+        
+        # Oturum metrikleri
+        st.metric(
+            label="🕐 Giriş Zamanı",
+            value=current_time
+        )
+        
+    # Alt kısım - Çıkış butonu
+    st.divider()
+    
+    # Çıkış butonu için ortalanmış kolon
+    _, center_col, _ = st.columns([2, 1, 2])
+    with center_col:
+        if st.button("🚪 Güvenli Çıkış Yap", key="user_logout_button", use_container_width=True, type="primary"):
+            logout()
+            return
 
 
 
